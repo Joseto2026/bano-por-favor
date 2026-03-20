@@ -15,9 +15,3 @@
     "vite": "^4.4.0"
   }
 }
-4. Pulsa "Commit changes"
-
-Vercel detectará el cambio automáticamente y volverá a intentar el despliegue. Dime cuando lo hayas guardado. 🚀
-
-
-
