@@ -153,6 +153,7 @@ function DetailPanel({ b, onClose, onReseña }) {
   const handleSubmit = async () => {
     if (!newReview.stars || !newReview.text.trim()) return;
     setSaving(true);
+    // Actualizar valoración en Supabase
     const nuevaVal = ((b.valoracion * b.num_resenas) + newReview.stars) / (b.num_resenas + 1);
     await fetch(`${SUPABASE_URL}/rest/v1/lugares?id=eq.${b.id}`, {
       method: "PATCH",
@@ -309,12 +310,16 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Seed button if empty */}
         {places.length === 0 && !error && (
           <button onClick={seedData} disabled={seeding} style={{ width: "100%", background: "#10b981", border: "none", borderRadius: 12, padding: "11px", color: "white", fontWeight: 700, fontSize: 13, cursor: seeding ? "not-allowed" : "pointer", marginBottom: 10 }}>
             {seeding ? "⏳ Cargando datos..." : "🚀 Cargar datos de ejemplo"}
           </button>
         )}
+
         {error && <div style={{ background: "#fee2e2", color: "#dc2626", borderRadius: 10, padding: "8px 12px", fontSize: 12, marginBottom: 8 }}>⚠️ {error}</div>}
+
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Buscar lugar..."
           style={{ width: "100%", boxSizing: "border-box", background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 12, padding: "8px 14px", color: "white", fontSize: 13, fontFamily: "inherit", outline: "none", marginBottom: 8 }}
         />
@@ -338,17 +343,34 @@ export default function App() {
           </div>
         )}
       </div>
+
       <div style={{ padding: 14, maxWidth: 480, margin: "0 auto" }}>
         {places.length > 0 && (
           <div style={{ marginBottom: 12 }}>
             <MapView places={filtered.length > 0 ? filtered : places} selected={selected} onSelect={b => setSelected(s => s?.id === b.id ? null : b)} />
           </div>
         )}
+
         {selected && (
           <div style={{ marginBottom: 14 }}>
             <DetailPanel b={selected} onClose={() => setSelected(null)} onReseña={fetchPlaces} />
           </div>
         )}
+
         {places.length > 0 && (
           <>
-            <div style={{ fontWeight: 700, fontSize: 11, color: "#6b7280", marginBottom: 8, letterSpacing: "0.06
+            <div style={{ fontWeight: 700, fontSize: 11, color: "#6b7280", marginBottom: 8, letterSpacing: "0.06em" }}>
+              {filtered.length} LUGARES — ORDENADOS POR DISTANCIA
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {filtered.length === 0
+                ? <div style={{ textAlign: "center", padding: 30, color: "#9ca3af", fontSize: 13 }}>😔 No hay lugares con estos filtros.</div>
+                : filtered.map(b => <PlaceCard key={b.id} b={b} isSelected={selected?.id === b.id} onClick={() => setSelected(s => s?.id === b.id ? null : b)} />)
+              }
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
